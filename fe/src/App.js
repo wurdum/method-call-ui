@@ -64,18 +64,54 @@ function App() {
     
     // Use functional update to avoid stale state issues
     setElements(prevElements => {
-      // Find existing elements to avoid duplicates
-      const existingIds = new Set(prevElements.map(el => el.data.id));
-      const elementsToAdd = newElements.filter(el => !existingIds.has(el.data.id));
+      // Create a map of existing elements for easier lookup
+      const existingElementsMap = new Map();
+      prevElements.forEach(el => existingElementsMap.set(el.data.id, el));
       
-      if (elementsToAdd.length === 0) {
-        console.log("No new elements to add");
-        return prevElements;
-      }
+      // Process each new element
+      const updatedElements = [...prevElements];
       
-      console.log("Adding elements:", elementsToAdd);
-      return [...prevElements, ...elementsToAdd];
+      newElements.forEach(newEl => {
+        const existingEl = existingElementsMap.get(newEl.data.id);
+        
+        if (existingEl) {
+          // Element already exists, increment the count
+          const updatedCount = existingEl.data.count + 1;
+          
+          // Find the index of the existing element
+          const index = updatedElements.findIndex(el => el.data.id === newEl.data.id);
+          
+          // Update the element with the new count and updated label
+          if (index !== -1) {
+            updatedElements[index] = {
+              ...existingEl,
+              data: {
+                ...existingEl.data,
+                count: updatedCount,
+                label: generateLabelWithCount(
+                  existingEl.data.file,
+                  existingEl.data.lineNumber,
+                  existingEl.data.structureName,
+                  existingEl.data.methodName,
+                  updatedCount
+                )
+              }
+            };
+          }
+        } else {
+          // This is a new element, add it to the array
+          updatedElements.push(newEl);
+        }
+      });
+      
+      return updatedElements;
     });
+  };
+  
+  // Helper function to generate labels with count
+  const generateLabelWithCount = (file, lineNumber, structureName, methodName, count) => {
+    const baseLabel = `${file}:${lineNumber}\n${structureName}\n${methodName}`;
+    return count > 1 ? `${baseLabel} (${count})` : baseLabel;
   };
 
   // Effect for initializing the WebSocket connection
@@ -157,7 +193,15 @@ function App() {
         'target-arrow-shape': 'triangle',
         'curve-style': 'bezier'
       }
-    }
+    },
+    // {
+    //   selector: 'node[count > 1]',
+    //   style: {
+    //     'background-color': '#FF8C00',  // Change color for nodes with count > 1
+    //     'border-width': 2,
+    //     'border-color': '#FF4500'
+    //   }
+    // }
   ];
 
   // Add a test button and debug info
