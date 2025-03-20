@@ -14,6 +14,7 @@ function App() {
   const socketRef = useRef(null);
   const [connected, setConnected] = useState(false);
   const [lastMessage, setLastMessage] = useState(null);
+  const [layoutDirection, setLayoutDirection] = useState('TB');
 
   // Define the function to add stack frames to the graph
   const addStackFrameToGraph = (stackFrameData) => {
@@ -157,14 +158,14 @@ function App() {
       console.log("Elements updated, running layout");
       cyRef.current.layout({
         name: 'dagre',
-        rankDir: 'TB',
+        rankDir: layoutDirection,
         nodeSep: 120,
         rankSep: 40,
         animate: true,
         animationDuration: 300
       }).run();
     }
-  }, [elements]);
+  }, [elements, layoutDirection]);
 
   const cytoscapeStylesheet = [
     {
@@ -314,6 +315,29 @@ function App() {
         >
           Rearrange Nodes
         </button>
+        <button
+          onClick={() => {
+            // Toggle between 'TB' (vertical) and 'LR' (horizontal)
+            const newDirection = layoutDirection === 'TB' ? 'LR' : 'TB';
+            setLayoutDirection(newDirection);
+            
+            // Apply the new layout
+            if (cyRef.current) {
+              cyRef.current.layout({
+                name: 'dagre',
+                rankDir: newDirection,
+                nodeSep: 40,
+                rankSep: 50,
+                edgeLength: 50,
+                animate: true,
+                animationDuration: 300
+              }).run();
+            }
+          }}
+          style={{ marginLeft: '10px', padding: '8px 16px' }}
+        >
+          Switch to {layoutDirection === 'TB' ? 'Horizontal' : 'Vertical'} Layout
+        </button>
       </div>
       
       <div style={{ flexGrow: 1, position: 'relative' }}>
@@ -334,7 +358,7 @@ function App() {
             stylesheet={cytoscapeStylesheet}
             layout={{
               name: 'dagre',
-              rankDir: 'TB',
+              rankDir: layoutDirection,
               nodeSep: 120,
               rankSep: 40
             }}
