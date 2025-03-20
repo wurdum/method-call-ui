@@ -26,6 +26,11 @@ function App() {
     
     const { sequence } = stackFrameData;
     const newElements = [];
+  
+    // Helper function to generate labels with count
+    const generateLabelWithCount = (file, lineNumber, structureName, methodName, count) => {
+      return `calls: ${count}\n${file}:${lineNumber}\n${structureName}:${methodName}()`;
+    };
     
     // Create nodes for each stack frame
     sequence.forEach((frame, index) => {
@@ -34,7 +39,7 @@ function App() {
       newElements.push({
         data: {
           id: nodeId,
-          label: `${frame.file}:${frame.lineNumber}\n${frame.structureName}\n${frame.methodName}`,
+          label: generateLabelWithCount(frame.file, frame.lineNumber, frame.structureName, frame.methodName, 1),
           file: frame.file,
           lineNumber: frame.lineNumber,
           structureName: frame.structureName,
@@ -107,12 +112,6 @@ function App() {
       return updatedElements;
     });
   };
-  
-  // Helper function to generate labels with count
-  const generateLabelWithCount = (file, lineNumber, structureName, methodName, count) => {
-    const baseLabel = `${file}:${lineNumber}\n${structureName}\n${methodName}`;
-    return count > 1 ? `${baseLabel} (${count})` : baseLabel;
-  };
 
   // Effect for initializing the WebSocket connection
   useEffect(() => {
@@ -159,8 +158,8 @@ function App() {
       cyRef.current.layout({
         name: 'dagre',
         rankDir: 'TB',
-        nodeSep: 80,
-        rankSep: 100,
+        nodeSep: 120,
+        rankSep: 40,
         animate: true,
         animationDuration: 300
       }).run();
@@ -171,12 +170,17 @@ function App() {
     {
       selector: 'node',
       style: {
-        'background-color': '#6FB1FC',
+        'background-opacity': 0,           // Make background fully transparent
+        'background-color': '#ffffff',     // Set a background color (won't be visible due to opacity)
+        'border-width': 1,                 // Add a border width
+        'border-color': '#888',            // Grey border color
         'label': 'data(label)',
         'text-wrap': 'wrap',
-        'text-max-width': '100px',
-        'width': 100,
-        'height': 80,
+        'text-max-width': '200px',         // Maximum text width before wrapping
+        'line-height': 1.5,                // Increase line spacing
+        'width': 'label',                  // Width based on label content
+        'height': 'label',                 // Height based on label content
+        'padding': '10px',                 // Add padding around text
         'font-size': '10px',
         'text-valign': 'center',
         'text-halign': 'center',
@@ -184,24 +188,64 @@ function App() {
         'border-radius': 8
       }
     },
+    // Node styles based on count
+    {
+      selector: 'node[count > 1][count <= 5]',
+      style: {
+        'border-width': 2,  // Slightly thicker border for counts 2-5
+        'border-color': '#666'  // Slightly darker border
+      }
+    },
+    {
+      selector: 'node[count > 5][count <= 10]',
+      style: {
+        'border-width': 3,  // Medium thick border for counts 6-10
+        'border-color': '#444'  // Darker border
+      }
+    },
+    {
+      selector: 'node[count > 10]',
+      style: {
+        'border-width': 4,  // Thick border for counts over 10
+        'border-color': '#222'  // Very dark border
+      }
+    },
     {
       selector: 'edge',
       style: {
-        'width': 2,
+        'width': 'data(count)',  // Base width on count
         'line-color': '#ccc',
         'target-arrow-color': '#ccc',
         'target-arrow-shape': 'triangle',
         'curve-style': 'bezier'
       }
     },
-    // {
-    //   selector: 'node[count > 1]',
-    //   style: {
-    //     'background-color': '#FF8C00',  // Change color for nodes with count > 1
-    //     'border-width': 2,
-    //     'border-color': '#FF4500'
-    //   }
-    // }
+    // You can add more specific selectors for different count ranges
+    {
+      selector: 'edge[count <= 1]',
+      style: {
+        'width': 1  // Default width for count 1
+      }
+    },
+    {
+      selector: 'edge[count > 1][count <= 5]',
+      style: {
+        'width': 3  // Medium width for counts 2-5
+      }
+    },
+    {
+      selector: 'edge[count > 5][count <= 10]',
+      style: {
+        'width': 5  // Thicker for counts 6-10
+      }
+    },
+    {
+      selector: 'edge[count > 10]',
+      style: {
+        'width': 7,  // Very thick for counts over 10
+        'line-color': '#ff9999'  // Optional: different color for high-traffic edges
+      }
+    },
   ];
 
   // Add a test button and debug info
@@ -252,6 +296,24 @@ function App() {
         >
           Clear Graph
         </button>
+        <button
+          onClick={() => {
+            if (cyRef.current) {
+              cyRef.current.layout({
+                name: 'dagre',
+                rankDir: 'TB',
+                nodeSep: 40,
+                rankSep: 50,
+                edgeLength: 50,
+                animate: true,
+                animationDuration: 300
+              }).run();
+            }
+          }}
+          style={{ marginLeft: '10px', padding: '8px 16px' }}
+        >
+          Rearrange Nodes
+        </button>
       </div>
       
       <div style={{ flexGrow: 1, position: 'relative' }}>
@@ -273,8 +335,8 @@ function App() {
             layout={{
               name: 'dagre',
               rankDir: 'TB',
-              nodeSep: 80,
-              rankSep: 100
+              nodeSep: 120,
+              rankSep: 40
             }}
             style={{ width: '100%', height: '100%' }}
             cy={(cy) => { cyRef.current = cy; }}
