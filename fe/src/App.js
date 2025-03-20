@@ -139,11 +139,13 @@ function App() {
         'label': 'data(label)',
         'text-wrap': 'wrap',
         'text-max-width': '100px',
-        'width': 80,
+        'width': 100,
         'height': 80,
         'font-size': '10px',
         'text-valign': 'center',
-        'text-halign': 'center'
+        'text-halign': 'center',
+        'shape': 'round-rectangle',
+        'border-radius': 8
       }
     },
     {
