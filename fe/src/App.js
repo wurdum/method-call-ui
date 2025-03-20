@@ -168,85 +168,152 @@ function App() {
   }, [elements, layoutDirection]);
 
   const cytoscapeStylesheet = [
+    // Base node styling
     {
       selector: 'node',
       style: {
-        'background-opacity': 0,           // Make background fully transparent
-        'background-color': '#ffffff',     // Set a background color (won't be visible due to opacity)
-        'border-width': 1,                 // Add a border width
-        'border-color': '#888',            // Grey border color
+        'background-color': '#fafbff',     // Light gray background
+        'background-opacity': 1,           // Make background visible
+        'border-width': 1,                 // Consistent border width
+        'border-color': '#ddd',            // Light border
         'label': 'data(label)',
         'text-wrap': 'wrap',
-        'text-max-width': '200px',         // Maximum text width before wrapping
-        'line-height': 1.5,                // Increase line spacing
-        'width': 'label',                  // Width based on label content
-        'height': 'label',                 // Height based on label content
-        'padding': '10px',                 // Add padding around text
+        'text-max-width': '200px',
+        'line-height': 1.5,
+        'width': 'label',
+        'height': 'label',
+        'padding': '10px',
         'font-size': '10px',
         'text-valign': 'center',
         'text-halign': 'center',
         'shape': 'round-rectangle',
-        'border-radius': 8
+        'border-radius': 8,
+        'color': '#333',                   // Dark text for contrast
       }
     },
-    // Node styles based on count
+    
+    // Heat map coloring for nodes based on count
+    // Very low frequency (counts: 1-3)
     {
-      selector: 'node[count > 1][count <= 5]',
+      selector: 'node[count <= 3]',
       style: {
-        'border-width': 2,  // Slightly thicker border for counts 2-5
-        'border-color': '#666'  // Slightly darker border
+        'background-color': '#f0f2fc',     // Very light gray
+        'border-color': '#e0e0e0',
       }
     },
+    // Low frequency (counts: 4-7)
     {
-      selector: 'node[count > 5][count <= 10]',
+      selector: 'node[count > 3][count <= 7]',
       style: {
-        'border-width': 3,  // Medium thick border for counts 6-10
-        'border-color': '#444'  // Darker border
+        'background-color': '#e1e5f7',     // Light gray
+        'border-color': '#bdbdbd',
+        'color': '#333'
       }
     },
+    // Medium frequency (counts: 8-15)
     {
-      selector: 'node[count > 10]',
+      selector: 'node[count > 7][count <= 15]',
       style: {
-        'border-width': 4,  // Thick border for counts over 10
-        'border-color': '#222'  // Very dark border
+        'background-color': '#d7ddfa',     // Light blue
+        'border-color': '#7ab7e0',
       }
     },
+    // High frequency (counts: 16-30)
+    {
+      selector: 'node[count > 15][count <= 30]',
+      style: {
+        'background-color': '#cdd4fa',     // Medium blue
+        'border-color': '#4a99c9',
+      }
+    },
+    // Very high frequency (counts: 31+)
+    {
+      selector: 'node[count > 30]',
+      style: {
+        'background-color': '#c0c9fc',     // Dark blue
+        'border-color': '#08519c',
+      }
+    },
+    
+    // Base edge styling
     {
       selector: 'edge',
       style: {
-        'width': 'data(count)',  // Base width on count
-        'line-color': '#ccc',
-        'target-arrow-color': '#ccc',
+        'width': 1,                        // Consistent width for all edges
+        'line-color': '#ddd',              // Light gray for low-frequency edges
+        'target-arrow-color': '#ddd',
         'target-arrow-shape': 'triangle',
-        'curve-style': 'bezier'
+        'curve-style': 'bezier',
+        'opacity': 0.8                     // Slight transparency for edges
       }
     },
-    // You can add more specific selectors for different count ranges
+    
+    // Edge color based on frequency
+    // Very low frequency (counts: 1-3)
     {
-      selector: 'edge[count <= 1]',
+      selector: 'edge[count <= 3]',
       style: {
-        'width': 1  // Default width for count 1
+        'line-color': '#e0e0e0',           // Very light gray
+        'target-arrow-color': '#e0e0e0',
+        'opacity': 0.7
+      }
+    },
+    // Low frequency (counts: 4-7)
+    {
+      selector: 'edge[count > 3][count <= 7]',
+      style: {
+        'line-color': '#bdbdbd',           // Light gray
+        'target-arrow-color': '#bdbdbd',
+        'opacity': 0.8
+      }
+    },
+    // Medium frequency (counts: 8-15)
+    {
+      selector: 'edge[count > 7][count <= 15]',
+      style: {
+        'line-color': '#9ecae1',           // Light blue
+        'target-arrow-color': '#9ecae1',
+        'opacity': 0.85
+      }
+    },
+    // High frequency (counts: 16-30)
+    {
+      selector: 'edge[count > 15][count <= 30]',
+      style: {
+        'line-color': '#4292c6',           // Medium blue
+        'target-arrow-color': '#4292c6',
+        'opacity': 0.9
+      }
+    },
+    // Very high frequency (counts: 31+)
+    {
+      selector: 'edge[count > 30]',
+      style: {
+        'line-color': '#084594',           // Dark blue
+        'target-arrow-color': '#084594',
+        'width': 1.5,                      // Only slightly thicker for highest frequency
+        'opacity': 1
+      }
+    },
+    
+    // Hover styles to enhance interactivity
+    {
+      selector: 'node:hover',
+      style: {
+        'border-width': 2,
+        'border-color': '#4682B4',         // Steel blue highlight for hover
+        'z-index': 999                     // Bring hovered node to front
       }
     },
     {
-      selector: 'edge[count > 1][count <= 5]',
+      selector: 'edge:hover',
       style: {
-        'width': 3  // Medium width for counts 2-5
+        'width': 2,
+        'line-color': '#4682B4',           // Steel blue highlight for hover
+        'target-arrow-color': '#4682B4',
+        'z-index': 999                     // Bring hovered edge to front
       }
-    },
-    {
-      selector: 'edge[count > 5][count <= 10]',
-      style: {
-        'width': 5  // Thicker for counts 6-10
-      }
-    },
-    {
-      selector: 'edge[count > 10]',
-      style: {
-        'width': 7,  // Very thick for counts over 10
-        'line-color': '#ff9999'  // Optional: different color for high-traffic edges
-      }
-    },
+    }
   ];
 
   // Add a test button and debug info
