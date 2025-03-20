@@ -1,0 +1,30 @@
+{
+    "sequence": [
+        {
+            "file": "app.js",
+            "lineNumber": 25,
+            "structureName": "UserController",
+            "methodName": "authenticate"
+        },
+        {
+            "file": "auth.js",
+            "lineNumber": 47,
+            "structureName": "AuthService",
+            "methodName": "verifyCredentials"
+        },
+        {
+            "file": "db.js",
+            "lineNumber": 112,
+            "structureName": "DatabaseClient",
+            "methodName": "query"
+        },
+        {
+            "file": "cache.js",
+            "lineNumber": 78,
+            "structureName": "CacheManager",
+            "methodName": "storeResult"
+        }
+    ],
+    "timestamp": "2025-03-20T14:35:27.892Z",
+    "traceId": "trace-123456"
+}
