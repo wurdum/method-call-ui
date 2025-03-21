@@ -30,7 +30,7 @@ function App() {
   
     // Helper function to generate labels with count
     const generateLabelWithCount = (file, lineNumber, structureName, methodName, count) => {
-      return `calls: ${count}\n${file}:${lineNumber}\n${structureName}:${methodName}()`;
+      return `${file}:${lineNumber}\n${structureName}:${methodName}()`;
     };
     
     // Create nodes for each stack frame
@@ -182,12 +182,12 @@ function App() {
         'line-height': 1.5,
         'width': 'label',
         'height': 'label',
-        'padding': '10px',
+        'padding': '8px',
         'font-size': '10px',
         'text-valign': 'center',
         'text-halign': 'center',
         'shape': 'round-rectangle',
-        'border-radius': 8,
+        'border-radius': 4,
         'color': '#333',                   // Dark text for contrast
       }
     },
@@ -239,6 +239,10 @@ function App() {
     {
       selector: 'edge',
       style: {
+        'label': 'data(count)',
+        'font-size': '10px',
+        'text-outline-width': 3,           // Text outline for readability
+        'text-outline-color': '#fff',      // White outline around text
         'width': 1,                        // Consistent width for all edges
         'line-color': '#ddd',              // Light gray for low-frequency edges
         'target-arrow-color': '#ddd',
@@ -320,7 +324,7 @@ function App() {
   return (
     <div style={{ height: '100vh', width: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
-        <h1>Real-time Method Call Visualization</h1>
+        <h1 style={{ margin: '0' }}>Real-time Method Call Visualization</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
           <div style={{ 
             width: '10px', 
