@@ -8,6 +8,67 @@ import dagre from 'cytoscape-dagre';
 // Register the dagre layout with cytoscape
 cytoscape.use(dagre);
 
+// Utility function to convert Cytoscape.js graph to Mermaid flowchart format
+const exportToMermaid = (cy) => {
+  // Get the basic Cytoscape JSON
+  const cytoscapeJson = cy.json().elements;
+  
+  // Start building the Mermaid flowchart string
+  let mermaidCode = 'flowchart TD\n';
+  
+  // Process nodes first - create node definitions
+  if (cytoscapeJson.nodes) {
+    cytoscapeJson.nodes.forEach((node) => {
+      // Clean the ID to ensure it works in Mermaid
+      const cleanId = node.data.id.replace(/[^a-zA-Z0-9]/g, '0');
+      
+      // Extract a readable label from the node data
+      // If the label contains newlines, replace them with spaces or <br>
+      let nodeLabel = node.data.label || node.data.id;
+      nodeLabel = nodeLabel.replace(/\n/g, '<br>');
+      
+      // Add node definition to Mermaid code
+      mermaidCode += `    ${cleanId}["${nodeLabel}"];\n`;
+    });
+  }
+  
+  // Add a blank line for readability
+  mermaidCode += '\n';
+  
+  // Process edges - create edge connections
+  if (cytoscapeJson.edges) {
+    cytoscapeJson.edges.forEach((edge) => {
+      // Clean the IDs to ensure they work in Mermaid
+      const sourceId = edge.data.source.replace(/[^a-zA-Z0-9]/g, '0');
+      const targetId = edge.data.target.replace(/[^a-zA-Z0-9]/g, '0');
+      
+      // Add edge with optional count label
+      const edgeLabel = edge.data.count ? ` |${edge.data.count}|` : '';
+      mermaidCode += `    ${sourceId} -->`;
+      
+      // Add label if it exists
+      if (edgeLabel) {
+        mermaidCode += edgeLabel;
+      }
+      
+      mermaidCode += ` ${targetId};\n`;
+    });
+  }
+  
+  return mermaidCode;
+};
+
+// Function to trigger download of text content
+const downloadText = (text, filename) => {
+  const dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(text);
+  const downloadAnchorNode = document.createElement('a');
+  downloadAnchorNode.setAttribute("href", dataStr);
+  downloadAnchorNode.setAttribute("download", filename);
+  document.body.appendChild(downloadAnchorNode);
+  downloadAnchorNode.click();
+  downloadAnchorNode.remove();
+};
+
 function App() {
   const [elements, setElements] = useState([]);
   const cyRef = useRef(null);
@@ -408,6 +469,20 @@ function App() {
           style={{ marginLeft: '10px', padding: '8px 16px' }}
         >
           Switch to {layoutDirection === 'TB' ? 'Horizontal' : 'Vertical'} Layout
+        </button>
+        <button
+          onClick={() => {
+            if (cyRef.current) {
+              const mermaidCode = exportToMermaid(cyRef.current);
+              downloadText(mermaidCode, "graph-flowchart.md");
+              
+              // Optional: Show a preview or message
+              console.log("Mermaid flowchart generated:", mermaidCode);
+            }
+          }}
+          style={{ marginLeft: '10px', padding: '8px 16px' }}
+        >
+          Export as Mermaid
         </button>
       </div>
       
