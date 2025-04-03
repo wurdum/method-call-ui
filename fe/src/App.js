@@ -94,9 +94,14 @@ function App() {
       return `${file}:${lineNumber}\n${structureName}:${methodName}()`;
     };
     
+    // Helper function to generate node id
+    const generateNodeId = (frame) => {
+      return `${frame.file}-${frame.structureName}-${frame.methodName}`.replace(/[^a-zA-Z0-9]/g, '_');
+    };
+    
     // Create nodes for each stack frame
     sequence.forEach((frame, index) => {
-      const nodeId = `${frame.file}-${frame.lineNumber}-${frame.structureName}-${frame.methodName}`.replace(/[^a-zA-Z0-9]/g, '_');
+      const nodeId = generateNodeId(frame);
       
       newElements.push({
         data: {
@@ -113,7 +118,7 @@ function App() {
       // Create edges between consecutive frames
       if (index < sequence.length - 1) {
         const nextFrame = sequence[index + 1];
-        const nextNodeId = `${nextFrame.file}-${nextFrame.lineNumber}-${nextFrame.structureName}-${nextFrame.methodName}`.replace(/[^a-zA-Z0-9]/g, '_');
+        const nextNodeId =  generateNodeId(nextFrame);
         const edgeId = `${nodeId}->${nextNodeId}`;
         
         newElements.push({
