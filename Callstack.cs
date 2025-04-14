@@ -55,8 +55,6 @@ public static class Callstack
             try
             {
                 var jsonData = JsonSerializer.Serialize(stackTraceInfo);
-                Client.Timeout = TimeSpan.FromSeconds(5);
-
                 var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
                 await Client.PostAsync("http://localhost:3001/api/stackframes", content);
             }
